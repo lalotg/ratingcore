@@ -11,6 +11,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
+using Microsoft.EntityFrameworkCore;
+using ratingcore.Models;
 
 namespace ratingcore
 {
@@ -26,6 +29,8 @@ namespace ratingcore
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<RatingContext>(opt=>
+                                                 opt.UseInMemoryDatabase("Rating"));
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -44,7 +49,7 @@ namespace ratingcore
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ratingcore v1"));
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseRouting();
 
@@ -54,6 +59,14 @@ namespace ratingcore
             {
                 endpoints.MapControllers();
             });
+
+            app.UseSpa(spa =>{
+                spa.Options.SourcePath = "ClientApp";
+                if(env.IsDevelopment())
+		        {
+			        spa.UseReactDevelopmentServer(npmScript: "start");
+		        }		
+	        });
         }
     }
 }
